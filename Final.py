@@ -4,9 +4,7 @@ from transformers import AutoModelForSequenceClassification
 import torch
 from annotated_text import annotated_text, annotation
 import os
- 
-
-
+import jdk
 import streamlit as st
 import numpy as np
 @st.cache(allow_output_mutation=True,show_spinner=False)
@@ -18,7 +16,7 @@ def load_model(model_path,tokenizer_path,seg_path):
     # In[6]:
 
  
-
+jdk.install('11')
 st.title('Testing function app')
 
 
