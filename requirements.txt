@@ -1,0 +1,7 @@
+streamlit
+transformers
+vncorenlp
+torch
+st-annotated-text
+numpy
+os
