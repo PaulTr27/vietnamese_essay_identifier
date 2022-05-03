@@ -30,7 +30,7 @@ add_selectbox = st.sidebar.selectbox(
 if add_selectbox == 'Use the app':
     st.write("Welcome to your friendly app")
     cwd = os.getcwd() 
-    seg_path = os.path.join(cwd,'VnCoreNLP/VnCoreNLP-1.1.1.jar')
+    seg_path = os.path.join(cwd,'VnCoreNLP-1.1.1.jar')
     with st.spinner(text="Initializing..."):
         classifier, tokenizer, segmenter = load_model("PaulTran/vietnamese_essay_identify",
                                                       "vinai/phobert-base",
