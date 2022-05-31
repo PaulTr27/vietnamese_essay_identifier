@@ -5,3 +5,7 @@ torch
 st-annotated-text
 numpy
 install-jdk
+textdistance[extras]
+joblib
+os
+pandas
