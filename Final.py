@@ -24,7 +24,7 @@ def load_model(model_path,tokenizer_path,seg_path):
 def application(): 
     st.write("Welcome to your friendly app")
     cwd = os.getcwd() 
-    segmenter_path = os.path.join(cwd,'VnCoreNLP','VnCoreNLP-1.1.1.jar')
+    segmenter_path = os.path.join(cwd,'VnCoreNLP-1.1.1.jar')
     with st.spinner(text="Initializing..."):
         classifier, tokenizer, segmenter = load_model("PaulTran/vietnamese_essay_identify",
                                                       "vinai/phobert-base",
