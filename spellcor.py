@@ -65,7 +65,7 @@ class spellcorrect:
       is_space = (self.space_svc.predict(self.encode_word_for_svc(text)) == 1)
       if not is_space or force_correct:
             en_txt = self.encode_input(text)
-            sim = [td.DamerauLevenshtein(qval=1).normalized_similarity(en_txt,str(word)) for word in self.telex_vocab]
+            sim = [td.DamerauLevenshtein(qval=2).normalized_similarity(en_txt,str(word)) for word in self.telex_vocab]
             df_res = pd.DataFrame(self.vocab)
             df_res['Similarity'] = sim
             corrected = df_res.sort_values(['Similarity'], ascending=False)
