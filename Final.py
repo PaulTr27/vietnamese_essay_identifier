@@ -23,8 +23,6 @@ def load_model(model_path,tokenizer_path,seg_path):
 def introduction():
     st.title('This is the new title of my introduction page')
 
-if 'sidebar_selection' not in st.session_state:
-    st.session_state.sidebar_selection = 'Introduction'
 
 def application(): 
     st.write("Welcome to your friendly app")
