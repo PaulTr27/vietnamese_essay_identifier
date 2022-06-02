@@ -23,40 +23,6 @@ class spellcorrect:
       encoded_txt.append(str(telex_char))
     return ''.join(encoded_txt)
 
-  def decode_output(self,text):
-    telex_init = 'aieouyd'
-    telex_next = 'sfwxjraeod'
-    telex_accent = 'sfwxj'
-    text = text.lower()
-    word_list = text.split()
-    decoded_txt = []
-    for word in word_list:
-      decoded_word = []
-      decoded = ''
-      for i in range(len(word)):
-        pad = ' '
-        word += pad
-        char = word[i]
-        if char not in decoded:
-          if char in telex_init:
-            i += 1
-            next_char = word[i]
-            index = i
-            if next_char in telex_next:
-              char = char + next_char
-              if char not in self.decode_dict.keys():
-                char = word[i-1]
-              else:
-                i +=1
-                if word[i] in telex_accent and char + word[i] in self.decode_dict.keys():
-                    char += word[i]
-
-            decoded = char
-          decoded_word.append(self.decode_dict[char])
-
-      decoded_txt.append(''.join(decoded_word))
-    return ' '.join(decoded_txt)
-
   def spell_correct(self,text,output = 'word',force_correct = False):
     if output not in ['word','similarity','DataFrame','hybrid']:
       print("Error")
@@ -88,19 +54,22 @@ class spellcorrect:
       if key in text and len(key) > 1:
         telex_comb_list.append(key)
         index_in_str.append(text.index(key))
-    first_comb = min(index_in_str)
-    
-    if index_in_str.count(first_comb) != 1:
-      index = np.where(np.array(index_in_str) == first_comb)[0]
-      comb_list = [telex_comb_list[i] for i in index]
-      split_letter = max(comb_list,key=len)
-    else:
-      index = np.where(np.array(index_in_str) == first_comb)[0][0]
-      split_letter = telex_comb_list[index]
+    if len(telex_comb_list) == 0:
+      return text
+    else: 
+      first_comb = min(index_in_str)
+      
+      if index_in_str.count(first_comb) != 1:
+        index = np.where(np.array(index_in_str) == first_comb)[0]
+        comb_list = [telex_comb_list[i] for i in index]
+        split_letter = max(comb_list,key=len)
+      else:
+        index = np.where(np.array(index_in_str) == first_comb)[0][0]
+        split_letter = telex_comb_list[index]
 
-    split_text = text.split(split_letter)
-    split_text[0] = split_text[0] + split_letter 
-    return " ".join(split_text)
+      split_text = text.split(split_letter)
+      split_text[0] = split_text[0] + split_letter 
+      return " ".join(split_text)
 
   def latter_split(self,text):
     space = text.index(' ')
@@ -162,8 +131,8 @@ def get_resources():
     df_vocab_path = os.path.join(cwd,'TextCorrect','Vocabulary.csv')
     space_svc= joblib.load(os.path.join(cwd,'TextCorrect','svc_space.joblib'))
     df_vocab = pd.read_csv(df_vocab_path)
-    alphabet = [' ', '_', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'á', 'à', 'ả', 'ã', 'ạ', 'â', 'ấ', 'ầ', 'ẩ', 'ẫ', 'ậ', 'ă', 'ắ', 'ằ', 'ẳ', 'ẵ', 'ặ', 'ó', 'ò', 'ỏ', 'õ', 'ọ', 'ô', 'ố', 'ồ', 'ổ', 'ỗ', 'ộ', 'ơ', 'ớ', 'ờ', 'ở', 'ỡ', 'ợ', 'é', 'è', 'ẻ', 'ẽ', 'ẹ', 'ê', 'ế', 'ề', 'ể', 'ễ', 'ệ', 'ú', 'ù', 'ủ', 'ũ', 'ụ', 'ư', 'ứ', 'ừ', 'ử', 'ữ', 'ự', 'í', 'ì', 'ỉ', 'ĩ', 'ị', 'ý', 'ỳ', 'ỷ', 'ỹ', 'ỵ', 'đ', 'ươ', 'ướ', 'ưở', 'ườ', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~']
-    telex = [' ', '_', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'as', 'af', 'ar', 'ax', 'aj', 'aa', 'aas', 'aaf', 'aar', 'aax', 'aaj', 'aw', 'aws', 'awf', 'awr', 'awx', 'awj', 'os', 'of', 'or', 'ox', 'oj', 'oo', 'oos', 'oof', 'oor', 'oox', 'ooj', 'ow', 'ows', 'owf', 'owr', 'owx', 'owj', 'es', 'ef', 'er', 'ex', 'ej', 'ee', 'ees', 'eef', 'eer', 'eex', 'eej', 'us', 'uf', 'ur', 'ux', 'uj', 'uw', 'uws', 'uwf', 'uwr', 'uwx', 'uwj', 'is', 'if', 'ir', 'ix', 'ij', 'ys', 'yf', 'yr', 'yx', 'yj', 'dd', 'uow', 'uows', 'uowr', 'uowf', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~']
+    alphabet = [' ', '_','-','–', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'á', 'à', 'ả', 'ã', 'ạ', 'â', 'ấ', 'ầ', 'ẩ', 'ẫ', 'ậ', 'ă', 'ắ', 'ằ', 'ẳ', 'ẵ', 'ặ', 'ó', 'ò', 'ỏ', 'õ', 'ọ', 'ô', 'ố', 'ồ', 'ổ', 'ỗ', 'ộ', 'ơ', 'ớ', 'ờ', 'ở', 'ỡ', 'ợ', 'é', 'è', 'ẻ', 'ẽ', 'ẹ', 'ê', 'ế', 'ề', 'ể', 'ễ', 'ệ', 'ú', 'ù', 'ủ', 'ũ', 'ụ', 'ư', 'ứ', 'ừ', 'ử', 'ữ', 'ự', 'í', 'ì', 'ỉ', 'ĩ', 'ị', 'ý', 'ỳ', 'ỷ', 'ỹ', 'ỵ', 'đ', 'ươ', 'ướ', 'ưở', 'ườ', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~']
+    telex = [' ', '_','-','–', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'as', 'af', 'ar', 'ax', 'aj', 'aa', 'aas', 'aaf', 'aar', 'aax', 'aaj', 'aw', 'aws', 'awf', 'awr', 'awx', 'awj', 'os', 'of', 'or', 'ox', 'oj', 'oo', 'oos', 'oof', 'oor', 'oox', 'ooj', 'ow', 'ows', 'owf', 'owr', 'owx', 'owj', 'es', 'ef', 'er', 'ex', 'ej', 'ee', 'ees', 'eef', 'eer', 'eex', 'eej', 'us', 'uf', 'ur', 'ux', 'uj', 'uw', 'uws', 'uwf', 'uwr', 'uwx', 'uwj', 'is', 'if', 'ir', 'ix', 'ij', 'ys', 'yf', 'yr', 'yx', 'yj', 'dd', 'uow', 'uows', 'uowr', 'uowf', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~']
     telex_to_letter = {}
     for i in range(len(alphabet)):
         telex_to_letter[telex[i]]=alphabet[i]
