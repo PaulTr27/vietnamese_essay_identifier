@@ -4,6 +4,7 @@ from transformers import AutoModelForSequenceClassification
 import torch
 from annotated_text import annotated_text, annotation
 import os
+import re
 import textdistance as td
 import pandas as pd
 import joblib
@@ -19,7 +20,11 @@ def load_model(model_path,tokenizer_path,seg_path):
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
     return model, tokenizer, segmenter
     # In[6]:
+def introduction():
+    st.title('This is the new title of my introduction page')
 
+if 'sidebar_selection' not in st.session_state:
+    st.session_state.sidebar_selection = 'Introduction'
 
 def application(): 
     st.write("Welcome to your friendly app")
@@ -29,7 +34,7 @@ def application():
         classifier, tokenizer, segmenter = load_model("PaulTran/vietnamese_essay_identify",
                                                       "vinai/phobert-base",
                                                       segmenter_path)
-    essay = st.text_area('Write your essay here', "Đây là ví dụ",height=600)
+    essay = st.text_area('Write your essay here', "Đây là ví dụ",height=600,key = 'input_text')
     sentences_list = essay.split('.')
 
     submission = st.button('Submit')
@@ -38,7 +43,7 @@ def application():
         misspelled = []
         label_names = ['Nghị Luận','Biểu cảm','Miêu tả','Tự sự', 'Thuyết minh']
         for sentence in sentences_list:
-            sentence = sentence.lower().translate(str.maketrans('', '', string.punctuation))
+            sentence = re.sub(r'[^\w\s]', '', sentence.lower())
             segment = segmenter.tokenize(sentence)
             if len(segment) > 0:
                 for word in segment[0]:
@@ -75,7 +80,7 @@ def application():
             df_mis = pd.DataFrame(mis_dict)
             st.dataframe(df_mis)
             
-st.title('Testing function app')
+
 df_vocab ,decode_dict,encode_dict, space_svc = sc.get_resources()
 segmented_vocab = df_vocab['Segmented Vocabulary'].to_list()
 vocab = df_vocab['Vocabulary'].to_list()
@@ -83,26 +88,26 @@ telex_vocab = df_vocab['Telex Combination'].to_list()
 add_selectbox = st.sidebar.selectbox(
     "What would you like to do ?",
     ("Introduction","Use the app", "See the source-code","How I make this project works")
-)
+    , key = 'sidebar_selection')
 
 
-if add_selectbox == 'Use the app':
+if st.session_state.sidebar_selection == 'Use the app':
     application()
+elif st.session_state.sidebar_selection == 'Introduction':
+    introduction()   
+
+
+
+
     
 
-
-
-
-        
-
 else:
-    st.error("Nothing just yet")
+    st.write(st.session_state.sidebar_selection)
 
 
 
 
 # In[ ]:
-
 
 
 
