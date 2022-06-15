@@ -1,5 +1,3 @@
-from base64 import encode
-from cmath import nan
 import textdistance as td
 import pandas as pd
 import os
@@ -23,7 +21,7 @@ class spellcorrect:
       encoded_txt.append(str(telex_char))
     return ''.join(encoded_txt)
 
-  def spell_correct(self,text,output = 'word',force_correct = False):
+  def spell_correct(self,text,output = 'word',force_correct = False,qval=2):
     if output not in ['word','similarity','DataFrame','hybrid']:
       print("Error")
     else:
@@ -31,7 +29,7 @@ class spellcorrect:
       is_space = (self.space_svc.predict(self.encode_word_for_svc(text)) == 1)
       if not is_space or force_correct:
             en_txt = self.encode_input(text)
-            sim = [td.DamerauLevenshtein(qval=2).normalized_similarity(en_txt,str(word)) for word in self.telex_vocab]
+            sim = [td.DamerauLevenshtein(qval=qval).normalized_similarity(en_txt,str(word)) for word in self.telex_vocab]
             df_res = pd.DataFrame(self.vocab)
             df_res['Similarity'] = sim
             corrected = df_res.sort_values(['Similarity'], ascending=False)
@@ -47,35 +45,18 @@ class spellcorrect:
       else:
         return self.split_word(text)
 
-  def first_split(self,text):
-    telex_comb_list = []
-    index_in_str = []
-    for key in self.decode_dict.keys():
-      if key in text and len(key) > 1:
-        telex_comb_list.append(key)
-        index_in_str.append(text.index(key))
-    if len(telex_comb_list) == 0:
-      return text
-    else: 
-      first_comb = min(index_in_str)
-      
-      if index_in_str.count(first_comb) != 1:
-        index = np.where(np.array(index_in_str) == first_comb)[0]
-        comb_list = [telex_comb_list[i] for i in index]
-        split_letter = max(comb_list,key=len)
-      else:
-        index = np.where(np.array(index_in_str) == first_comb)[0][0]
-        split_letter = telex_comb_list[index]
+  
 
-      split_text = text.split(split_letter)
-      split_text[0] = split_text[0] + split_letter 
-      return " ".join(split_text)
-
-  def latter_split(self,text):
-    space = text.index(' ')
+  def split_txt(self,text):
+    if ' ' in text:
+      space = text.index(' ')
+    else:
+      space = 0
     if space + 1 == (len(text) - 2):
       return None, True
     else:
+      if text[space] == text[-1]:
+        return text[:-2], True
       after_space = text[space + 1]
       out = list(text)
       out[space] = after_space
@@ -84,34 +65,35 @@ class spellcorrect:
 
   def split_word(self,text,threshold = 0.85):
     text = text.lower()
-    split_text = self.first_split(text)
+    split_text, flag = self.split_txt(' '+text)
     sim_pair = []
-    sim_word = []
-    st.write(split_text)
-    for word in split_text.split():
+    word_pair = []
 
-      sim = self.spell_correct(word,output='hybrid',force_correct=True) 
+    for word in split_text:
 
-      sim_pair.append(sim[0][1])
-      sim_word.append(sim[0][0])
+        sim = self.spell_correct(word,output='hybrid',force_correct=True,qval=1) 
+        sim_pair.append(sim[0][1])
+        word_pair.append(sim[0][0])
+
     sim_rec = []
-    sim_rec.append([sim_pair,sim_word])
+    sim_rec.append([sim_pair,word_pair])
     mean_sim = []
     mean_sim.append(np.mean(sim_pair))
     if np.mean(sim_pair) >= threshold:
       best_pair = sim_rec[0][1]
       return " ".join(best_pair)
     else:
+      next_split = split_text
       flag = False
       while np.mean(sim_pair) <= threshold and flag == False:
-        next_split, flag = self.latter_split(split_text)  
+        next_split, flag = self.split_txt(next_split)  
         sim_pair = []
-        sim_word = []
+        word_pair = []
         for word in next_split.split():
-          sim = self.spell_correct(word,output='both') 
+          sim = self.spell_correct(word,output='hybrid') 
           sim_pair.append(sim[0][1])
-          sim_word.append(sim[0][0])
-        sim_rec.append([sim_pair,sim_word])
+          word_pair.append(sim[0][0])
+        sim_rec.append([sim_pair,word_pair])
         mean_sim.append(np.mean(sim_pair))
       best_pair = sim_rec[np.argmax(mean_sim)][1]
       return " ".join(best_pair)
