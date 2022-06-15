@@ -1,3 +1,4 @@
+
 from vncorenlp import VnCoreNLP
 from transformers import AutoTokenizer
 from transformers import AutoModelForSequenceClassification
@@ -13,100 +14,176 @@ import streamlit as st
 import numpy as np
 import spellcor as sc
 from spellcor import spellcorrect
+import matplotlib.pyplot as plt
 @st.cache(allow_output_mutation=True,show_spinner=False)
-def load_model(model_path,tokenizer_path,seg_path):
+def load_model(model_path,seg_path):
     segmenter = VnCoreNLP(seg_path, annotators="wseg", max_heap_size='-Xmx500m') 
     model = AutoModelForSequenceClassification.from_pretrained(model_path)
-    tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
+    tokenizer = AutoTokenizer.from_pretrained(model_path)
     return model, tokenizer, segmenter
     # In[6]:
 def introduction():
-    st.title('This is the new title of my introduction page')
-
-
+    markdown = "# ***WELCOME TO YOUR ESSAY ASSISTANT*** \n ## How to use this web-app \n Hi! This is Paul, the author of this project. To use the app, please select 'Use the application' on the sidebar to your left. If you want more information about this project or the source-code, please check out my [GitHub repository](https://github.com/PaulTran2734/vietnamese_essay_identifier) \n ## About this application \n - This is a handy NLP web-app created for those who struggles to write the right type of essay in Vietnamese. Especially students of primary or secondary level of education in Vietnam. \n - At primary level of education in Vietnam, students are introduced to 5 types of essay: Argumentative, Espressive, Expository, Narrative, Descriptive. When they are first introduced to these, they can find it hard to write the right type of essay. For example, they can be too *descriptive* in an **Expressive** essay which requires more emotion or thoughts about a subject or an object than the specifity of its features. Therefore, this simple application was developed in order to solve this problem to a certain degree. \n- A spell-check algorithm is also included in this app. Despite its inefficiency, it can at least check for words that are mistyped, or not exist in Vietnamese Dictionary. This is my first ever attempt in writing an NLP algorithm, hence its inefficiency. \n ## More about my project \n To know more about my project(e.g. which model I used and how I trained my model,etc) , go to 'How I make this project works' tab on the sidebar to your left. :smile:"
+    st.markdown(markdown)
+def radio_callback():
+    st.session_state.radio_option = st.session_state.radio
+def resubmit():
+    st.session_state.phase = 1
 def application(): 
-    st.write("Welcome to your friendly app")
+    st.header("Welcome to your friendly app")
     cwd = os.getcwd() 
     segmenter_path = os.path.join(cwd,'VnCoreNLP-1.1.1.jar')
     with st.spinner(text="Initializing..."):
-        classifier, tokenizer, segmenter = load_model("PaulTran/vietnamese_essay_identify",
-                                                      "vinai/phobert-base",
+        classifier, tokenizer, segmenter = load_model("PaulTran/vietnamese_essay_identify",                                        
                                                       segmenter_path)
-    essay = st.text_area('Write your essay here', "Đây là ví dụ",height=600,key = 'input_text')
-    sentences_list = essay.split('.')
 
-    submission = st.button('Submit')
-    if submission:
+    if 'phase' not in st.session_state:
+        st.session_state.phase = 1
+    if 'radio' not in st.session_state:
+        st.session_state.radio ='Simple'
+
+    if st.session_state.phase == 1:
+        notes = st.empty() 
+        notes.markdown('#### Write your essay in the text box and click Submit to see the results')
+        text_area = st.empty()
+        essay = text_area.text_area('Type your essay here', 'Hãy viết bài văn của bạn vào đây',height=600)
+        
+        placeholder = st.empty()
+        isclick = placeholder.button('Submit',key = 'submit')
+        if isclick:
+            st.session_state.input_text = essay
+            st.session_state.phase += 1
+            placeholder.empty()
+            text_area.empty()
+            notes.empty()
+
+
+    if st.session_state.phase == 2:
+
+        sentences_list = st.session_state.input_text.split('.')
         pred_labels_list = []
         misspelled = []
         label_names = ['Nghị Luận','Biểu cảm','Miêu tả','Tự sự', 'Thuyết minh']
-        for sentence in sentences_list:
-            sentence = re.sub(r'[^\w\s]', '', sentence.lower())
-            segment = segmenter.tokenize(sentence)
-            if len(segment) > 0:
-                for word in segment[0]:
-                    
-                    if word not in segmented_vocab and word not in decode_dict.keys():
-                        misspelled.append(word)
-            tokenized_txt = tokenizer(sentence,
-                                      max_length=tokenizer.model_max_length,
-                                      truncation=True,
-                                      padding=True,
-                                      return_tensors="pt"
-                                     )
-            input_ids, mask = tokenized_txt['input_ids'], tokenized_txt['attention_mask']
-            if input_ids is not None:
-                with torch.no_grad():
-                    logits = classifier(input_ids, mask).logits
-                prediction = torch.argmax(logits, dim=1)
-                pred_labels_list.append(prediction)
+        with st.spinner("Processing"):
+            for sentence in sentences_list:
+                sentence = re.sub(r'[^\w\s]', '', sentence.lower())
+                segment = segmenter.tokenize(sentence)
+                if len(segment) > 0:
+                    for word in segment[0]:
+                        
+                        if word not in segmented_vocab and word not in decode_dict.keys():
+                            misspelled.append(word)
+                tokenized_txt = tokenizer(sentence,
+                                        max_length=tokenizer.model_max_length,
+                                        truncation=True,
+                                        padding=True,
+                                        return_tensors="pt"
+                                        )
+                input_ids, mask = tokenized_txt['input_ids'], tokenized_txt['attention_mask']
+                if input_ids is not None:
+                    with torch.no_grad():
+                        logits = classifier(input_ids, mask).logits
+                    softmax_nn = torch.nn.Softmax(dim=1)
+                    softmax = softmax_nn(logits)    
+                    prediction = torch.argmax(softmax, dim=1)
+                    pred_labels_list.append(prediction)
+            pred_prob = []
+            for i in range(5):
+                pred_prob.append((pred_labels_list.count(i)/len(pred_labels_list)))
+            pred_label_name = label_names[np.argmax(pred_prob)]
+
+        if len(misspelled) == 0:
+            st.session_state.phase = 3
+
+        if st.session_state.phase == 3:
+            col1,col2 = st.columns([10,7])
+            with col1:
+                st.markdown("## Your essay")
+                st.write(st.session_state.input_text)
+            with col2:
+                st.markdown("## Evaluation")
+
+                md_txt = f"You have writen a/an **{pred_label_name}** essay."
+                st.markdown(md_txt)
             
-        pred_prob = []
-        for i in range(4):
-            pred_prob.append((pred_labels_list.count(i)/len(pred_labels_list)))
-        pred_label_name = label_names[np.argmax(pred_prob)]
-        st.write('Your essay is a {} type'.format(pred_label_name))
-        mis_dict = {}
-        mis_dict["Misspelled Word"] = misspelled
-        fix = []
-        spellcorrecter = spellcorrect(encode_dict,decode_dict,df_vocab,space_svc)
-        for word in misspelled:
-            out = spellcorrecter.spell_correct(word)
-            fix.append(out)
-        mis_dict["Did you mean"] = fix
-        with st.expander("See more detail here"):
-            df_mis = pd.DataFrame(mis_dict)
-            st.dataframe(df_mis)
-            
-
-df_vocab ,decode_dict,encode_dict, space_svc = sc.get_resources()
-segmented_vocab = df_vocab['Segmented Vocabulary'].to_list()
-vocab = df_vocab['Vocabulary'].to_list()
-telex_vocab = df_vocab['Telex Combination'].to_list()
-add_selectbox = st.sidebar.selectbox(
-    "What would you like to do ?",
-    ("Introduction","Use the app", "See the source-code","How I make this project works")
-    , key = 'sidebar_selection')
-
-
-if st.session_state.sidebar_selection == 'Use the app':
-    application()
-elif st.session_state.sidebar_selection == 'Introduction':
-    introduction()   
-
-
-
-
+            with st.expander("More details here"):
+                    fig1, ax1 = plt.subplots(figsize=(5, 3))
+                    wedges, texts, autotexts = ax1.pie(pred_prob, autopct='%1.1f%%',
+                            shadow=True, startangle=90)
+                    ax1.axis('equal')  
+                    ax1.legend(wedges,label_names,title = "Categories")
+                    plt.setp(autotexts, size=5, weight="bold")
+                    st.pyplot(fig1)
+                    st.write(f'Word count: {len(st.session_state.input_text.split())}')
+            back = st.empty()
+            go_back = back.button("Return",on_click = resubmit())
+            if go_back:
+                back.empty()
+        elif len(misspelled) > 0:
+            with st.spinner("Evaluating..."):
+                fix = []
+                spellcorrecter = spellcorrect(encode_dict,decode_dict,df_vocab,space_svc)
+                for word in misspelled:
+                    out = spellcorrecter.spell_correct(word)
+                    fix.append(out)
+                to_ann = st.session_state.input_text
+                ann_list = [txt + ' ' for txt in list(to_ann.split(' '))]
+                for word in misspelled:
+                    if (word +' ') in ann_list:
+                        idx = ann_list.index(word +' ')
+                        suggest = fix[misspelled.index(word)]
+                        ann_list[idx] = (word,suggest,'#faa') 
+                
+                col1, col2 = st.columns(2)
+                col1.text_area("Fix your essay here",st.session_state.input_text,key = 'input_text')
+                col2.write("Detected mistakes with suggestions")
+                with col2:
+                    annotated_text(*ann_list)
+            st.write("Click resubmit to submit again")
+            resubmit_button = st.button('Resubmit',on_click=resubmit())
+               
+        
+        
+def project_detail():
     
+    cwd = os.getcwd()
+    segmenter_path = os.path.join(cwd,'VnCoreNLP','VnCoreNLP-1.1.1.jar')
+    segmenter = VnCoreNLP(segmenter_path, annotators="wseg", max_heap_size='-Xmx500m') 
+    st.header("Click on expander for more information")
+    st.markdown('##### **Important**: \n -  Read before proceed. There are something you need to know before you see the details: \n    - asd')
 
-else:
     st.write(st.session_state.sidebar_selection)
+    with st.expander('How my spell-check algorithm works:'):
+            st.markdown('      The source-code is located on [GitHub](https://github.com/PaulTran2734/vietnamese_essay_identifier/blob/main/spellcor.py)')
+            st.markdown('### About the algorithm  \n The general baseline is quite simple. The algorithm first finds the mistakes in the essay, then calculates the similarity of mistaken words with every single word in a 74k words dictionary using DamerauLevenstein algorithm of [textdistance](https://github.com/life4/textdistance) module, and finally suggests alternatives. Quite simple right! :wink: ')
+            st.markdown('Now, we move on to the codes. Let our example string of text be: "ddaay laf một câu sai chisnh tar" ')
+            with st.echo():
+                sentence = "ddaay laf một câu sai chisnh tar" # mistake-filled sentence
+                correct_sentence = "Đây là một câu sai chính tả" # correct sentence
+            st.markdown('You can see the mistakes in the example. The first action of the algorithm is to find mistakes in the segmented sentences (see in the model expander).')
+            with st.echo():
+                misspelled = []
+                segment = segmenter.tokenize(sentence)
+                # print(segment)
+                # segment = [['ddaay', 'laf', 'một', 'câu', 'sai', 'chisnh', 'tar']]
+                if len(segment) > 0: # only execute if the sentence is not empty
+                    for word in segment[0]:
+                        if word not in segmented_vocab and word not in decode_dict.keys():
+                            misspelled.append(word)    
+if __name__ == '__main__':
+    df_vocab ,decode_dict,encode_dict, space_svc = sc.get_resources()
+    segmented_vocab = df_vocab['Segmented Vocabulary'].to_list()
+    vocab = df_vocab['Vocabulary'].to_list()
+    telex_vocab = df_vocab['Telex Combination'].to_list()
+    add_selectbox = st.sidebar.selectbox(
+        "What would you like to do ?",
+        ("Introduction","Use the app", "How I make this project works")
+        , key = 'sidebar_selection')
 
 
-
-
-# In[ ]:
-
-
-
-
+    if st.session_state.sidebar_selection == 'Use the app':
+        application()
+    elif st.session_state.sidebar_selection == 'Introduction':
+        introduction()   
+    else:
+        project_detail()
