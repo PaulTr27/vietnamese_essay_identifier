@@ -248,6 +248,7 @@ print(word_segmented_text)
             st.image("https://i.imgur.com/93aMEka.png")
             st.markdown("And my classification report")
             st.image("https://i.imgur.com/Ph8P3uu.png")
+            st.markdown("That is all about my works")
             
 
             
