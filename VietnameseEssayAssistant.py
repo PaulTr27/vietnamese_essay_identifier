@@ -162,7 +162,7 @@ def application():
 def project_detail():
     
         cwd = os.getcwd()
-        segmenter_path = os.path.join(cwd,'VnCoreNLP','VnCoreNLP-1.1.1.jar')
+        segmenter_path = os.path.join(cwd,'VnCoreNLP-1.1.1.jar')
         segmenter = VnCoreNLP(segmenter_path, annotators="wseg", max_heap_size='-Xmx500m') 
         st.header("Click on expander for more information")
         st.markdown("#### ***Important***  \n  *Read 'Global variables' before continue!!*")
