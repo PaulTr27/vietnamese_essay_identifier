@@ -40,7 +40,7 @@ class spellcorrect:
             if output == 'similarity':
               return corrected.values[0][1]
             if output == 'hybrid':
-              return corrected.values
+              return corrected.values[0]
             else:
               return corrected.head()
       
@@ -52,6 +52,10 @@ class spellcorrect:
   def split_txt(self,text):
     if ' ' in text:
       space = text.index(' ')
+    elif '_' in text:
+      idx = text.index('_')
+      text[idx] = ' '
+      space = idx
     else:
       space = 0
     if space + 1 == (len(text) - 2):
