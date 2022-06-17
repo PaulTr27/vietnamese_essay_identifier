@@ -3,6 +3,7 @@ from transformers import AutoTokenizer
 from transformers import AutoModelForSequenceClassification
 import torch
 from annotated_text import annotated_text, annotation
+from io import BytesIO
 import os
 import re
 import textdistance as td
@@ -14,6 +15,12 @@ import numpy as np
 import spellcor as sc
 from spellcor import spellcorrect
 import matplotlib.pyplot as plt
+
+st.set_page_config(page_title = "Vietnam EduNLP", 
+                   page_icon = 'https://i.imgur.com/BnJxvi3.png',
+                   layout = 'wide'
+                   )
+
 @st.cache(allow_output_mutation=True,show_spinner=False)
 def load_model(model_path,seg_path):
     segmenter = VnCoreNLP(seg_path, annotators="wseg", max_heap_size='-Xmx500m') 
@@ -22,7 +29,7 @@ def load_model(model_path,seg_path):
     return model, tokenizer, segmenter
     # In[6]:
 def introduction():
-    markdown = "# ***WELCOME TO YOUR ESSAY ASSISTANT*** \n ## How to use this web-app \n Hi! This is Paul, the author of this project. To use the app, please select 'Use the application' on the sidebar to your left. If you want more information about this project or the source-code, please check out my [GitHub repository](https://github.com/PaulTran2734/vietnamese_essay_identifier) \n ## About this application \n - This is a handy NLP web-app created for those who struggles to write the right type of essay in Vietnamese. Especially students of primary or secondary level of education in Vietnam. \n - At primary level of education in Vietnam, students are introduced to 5 types of essay: Argumentative, Espressive, Expository, Narrative, Descriptive. When they are first introduced to these, they can find it hard to write the right type of essay. For example, they can be too *descriptive* in an **Expressive** essay which requires more emotion or thoughts about a subject or an object than the specifity of its features. Therefore, this simple application was developed in order to solve this problem to a certain degree. \n- A spell-check algorithm is also included in this app. Despite its inefficiency, it can at least check for words that are mistyped, or not exist in Vietnamese Dictionary. This is my first ever attempt in writing an NLP algorithm, hence its inefficiency. \n ## More about my project \n To know more about my project e.g. which model I used and how I trained my model, etc, go to 'How I make this project works' tab on the sidebar to your left. :smile:"
+    markdown = "# ***WELCOME TO YOUR ESSAY ASSISTANT*** \n ## How to use this web-app \n Hi! This is Paul, the author of this project. To use the app, please select 'Use the application' on the sidebar to your left. If you want more information about this project or the source-code, please check out my [GitHub repository](https://github.com/PaulTran2734/vietnamese_essay_identifier) \n ## About this application \n - This is a handy NLP web-app created for those who struggles to write the right type of essay in Vietnamese. Especially students of primary or secondary level of education in Vietnam. \n - At primary level of education in Vietnam, students are introduced to 5 types of essay: Argumentative, Espressive, Expository, Narrative, Descriptive. When they are first introduced to these, they can find it hard to write the right type of essay. For example, they can be too *descriptive* in an **Expressive** essay which requires more emotion or thoughts about a subject or an object than the specifity of its features. Therefore, this simple application was developed in order to solve this problem to a certain degree. \n- A spell-check algorithm is also included in this app. Despite its inefficiency, it can at least check for words that are mistyped, or not exist in Vietnamese Dictionary. This is my first ever attempt in writing an NLP algorithm, hence its inefficiency. \n ## More about my project \n To know more about my project(e.g. which model I used and how I trained my model,etc) , go to 'How I make this project works' tab on the sidebar to your left. :smile:"
     st.markdown(markdown)
 def radio_callback():
     st.session_state.radio_option = st.session_state.radio
@@ -36,7 +43,7 @@ def reset():
 def application(): 
     st.header("Welcome to your friendly app")
     cwd = os.getcwd() 
-    segmenter_path = os.path.join(cwd,'VnCoreNLP-1.1.1.jar')
+    segmenter_path = os.path.join(cwd,'VnCoreNLP','VnCoreNLP-1.1.1.jar')
     with st.spinner(text="Initializing..."):
         classifier, tokenizer, segmenter = load_model("PaulTran/vietnamese_essay_identify",                                        
                                                       segmenter_path)
@@ -97,31 +104,6 @@ def application():
 
         if len(misspelled) == 0:
             st.session_state.phase = 3
-         
-        if st.session_state.phase == 3 or st.session_state.fixed:
-            col1,col2 = st.columns([10,7])
-            with col1:
-                st.markdown("## Your essay")
-                st.write(st.session_state.input_text)
-            with col2:
-                st.markdown("## Evaluation")
-
-                md_txt = f"You have writen a/an **{pred_label_name}** essay."
-                st.markdown(md_txt)
-            
-            with st.expander("More details here"):
-                    fig1, ax1 = plt.subplots(figsize=(5, 3))
-                    wedges, texts, autotexts = ax1.pie(pred_prob, autopct='%1.1f%%',
-                            shadow=True, startangle=90)
-                    ax1.axis('equal')  
-                    ax1.legend(wedges,label_names,title = "Categories")
-                    plt.setp(autotexts, size=5, weight="bold")
-                    st.pyplot(fig1)
-                    st.write(f'Word count: {len(st.session_state.input_text.split())}')
-            back = st.empty()
-            go_back = back.button("Return",on_click = reset())
-            if go_back:
-                back.empty()
         elif len(misspelled) > 0 and not st.session_state.fixed:
             with st.spinner("Evaluating..."):
                 fix = []
@@ -136,19 +118,51 @@ def application():
                         idx = ann_list.index(word +' ')
                         suggest = fix[misspelled.index(word)]
                         ann_list[idx] = (word,suggest,'#faa') 
-                
-                col1, col2 = st.columns(2)
-                col1.text_area("Fix your essay here",st.session_state.input_text,key = 'input_text')
-                col2.write("Detected mistakes with suggestions")
-                with col2:
-                    annotated_text(*ann_list)
-            st.write("Click resubmit to submit again after you fixed the mistakes")
-            resubmit_button = st.button('Resubmit',on_click=resubmit())
+                if not any([isinstance(value,list) for value in ann_list]):
+                    st.session_state.phase = 3 
+                else:
+                    col1, col2 = st.columns(2)
+                    col1.text_area("Fix your essay here",st.session_state.input_text,key = 'input_text',height = 1000)
+                    col2.write("Detected mistakes with suggestions")
+                    with col2:
+                        st.markdown(f',<p align ="justify">{annotated_text(*ann_list)}</p>',allow_unsafe_html = True)
+                    st.write("Click resubmit to submit again after you fixed the mistakes")
+                    resubmit_button = st.button('Resubmit',on_click=resubmit())
+
+        if st.session_state.phase == 3 or st.session_state.fixed:
+            col1,col2 = st.columns([10,7])
+            with col1:
+                st.markdown("## Your essay")
+                st.write(st.session_state.input_text)
+            with col2:
+                st.markdown("## Evaluation")
+
+                md_txt = f"You have writen a/an **{pred_label_name}** essay."
+                st.markdown(md_txt)
+            
+            with col2:
+                    fig, ax = plt.subplots(figsize=(7, 3))
+                    fig.suptitle('How your essay sounds', fontsize=16)
+                    wedges, texts, autotexts = ax.pie(pred_prob, autopct='%1.1f%%',
+                            shadow=False, startangle=90,radius = 2 )
+
+                    ax.axis('equal')  
+                    ax.legend(wedges,label_names,title = "Categories",title_fontsize = 'x-large',fontsize = "medium")
+                    plt.setp(autotexts, size=10, weight="bold")
+                    buf = BytesIO()
+                    fig.savefig(buf, format="png")
+                    st.image(buf)
+                    st.write(f'Word count: {len(st.session_state.input_text.split())}')
+            back = st.empty()
+            go_back = back.button("Return",on_click = reset())
+            if go_back:
+                back.empty()
+        
 
 def project_detail():
     
         cwd = os.getcwd()
-        segmenter_path = os.path.join(cwd,'VnCoreNLP-1.1.1.jar')
+        segmenter_path = os.path.join(cwd,'VnCoreNLP','VnCoreNLP-1.1.1.jar')
         segmenter = VnCoreNLP(segmenter_path, annotators="wseg", max_heap_size='-Xmx500m') 
         st.header("Click on expander for more information")
         st.markdown("#### ***Important***  \n  *Read 'Global variables' before continue!!*")
