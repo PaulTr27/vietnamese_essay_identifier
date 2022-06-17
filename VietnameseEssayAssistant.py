@@ -244,8 +244,11 @@ print(word_segmented_text)
 )
 
             st.markdown("Lastly, the segmented texts were tokenized with Transformers-model's Tokenizer, in this case PhoBERT model's Tokenizer.")
-            st.markdown("After I has done processed the training dataset, I finetuned the model in 10 epochs, thus created the model for this project. \n That is all about my model. ")
-
+            st.markdown("After I has done processed the training dataset, I finetuned the model in 10 epochs, thus created the model for this project. \n I achieved 83.35 percent accuracy on test set. You can see my confusion matrix below")
+            st.image("https://i.imgur.com/93aMEka.png")
+            st.markdown("And my classification report")
+            st.image("https://i.imgur.com/Ph8P3uu.png")
+            
 
             
 if __name__ == '__main__':
