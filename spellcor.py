@@ -1,5 +1,6 @@
 from base64 import encode
 from cmath import nan
+from posixpath import split
 import textdistance as td
 import pandas as pd
 import os
@@ -40,7 +41,7 @@ class spellcorrect:
             if output == 'similarity':
               return corrected.values[0][1]
             if output == 'hybrid':
-              return corrected.values
+              return corrected.values.tolist()[0]
             else:
               return corrected.head()
       
@@ -50,61 +51,69 @@ class spellcorrect:
   
 
   def split_txt(self,text):
-    if ' ' in text:
-      space = text.index(' ')
-    elif '_' in text:
-      idx = text.index('_')
-      text[idx] = ' '
-      space = idx
+
+    if '_' in text:
+      text.replace('_',' ')   
+      return  text, True
     else:
-      space = 0
-    if space + 1 == (len(text) - 2):
-      return None, True
-    else:
-      if text[space] == text[-1]:
-        return text[:-2], True
-      after_space = text[space + 1]
-      out = list(text)
-      out[space] = after_space
-      out[space + 1] = ' '
-      return ''.join(out), False
+      if ' ' in text:
+        space = text.index(' ')
+      else:
+        text = ' ' + text
+        space = -1
+      if space + 1 == (len(text) - 2):
+        return text.split(), True
+      else:
+        if text[space] == text[-1]:
+          return text[:-2], True
+        after_space = text[space + 1]
+        out = list(text)
+        out[space] = after_space
+        out[space + 1] = ' '
+        return ''.join(out).split(), False
 
   def split_word(self,text,threshold = 0.85):
     text = text.lower()
-    split_text, flag = self.split_txt(' '+text)
+    split_text, flag = self.split_txt(text)
+
     sim_pair = []
     word_pair = []
-
-    for word in split_text:
-
-        sim = self.spell_correct(word,output='hybrid',force_correct=True,qval=1) 
-        sim_pair.append(sim[0][1])
-        word_pair.append(sim[0][0])
-
-    sim_rec = []
-    sim_rec.append([sim_pair,word_pair])
-    mean_sim = []
-    mean_sim.append(np.mean(sim_pair))
-    if np.mean(sim_pair) >= threshold:
-      best_pair = sim_rec[0][1]
-      return " ".join(best_pair)
+    if flag == True:
+      return split_text
     else:
-      next_split = split_text
-      flag = False
-      while np.mean(sim_pair) <= threshold and flag == False:
-        next_split, flag = self.split_txt(next_split)  
-        sim_pair = []
-        word_pair = []
-        st.write(next_split)
-        for word in next_split.split():
-          sim = self.spell_correct(word,output='hybrid')
-          st.write(sim)
-          sim_pair.append(sim[0][1])
-          word_pair.append(sim[0][0])
-        sim_rec.append([sim_pair,word_pair])
-        mean_sim.append(np.mean(sim_pair))
-      best_pair = sim_rec[np.argmax(mean_sim)][1]
-      return " ".join(best_pair)
+      for word in split_text:
+
+          sim = self.spell_correct(word,output='hybrid',force_correct=True,qval=1) 
+
+          sim_pair.append(sim[1])
+          word_pair.append(sim[0])
+
+      sim_rec = []
+      sim_rec.append([sim_pair,word_pair])
+      mean_sim = []
+      mean_sim.append(np.mean(sim_pair))
+      if np.mean(sim_pair) >= threshold:
+        best_pair = sim_rec[0][1]
+        return " ".join(best_pair)
+      else:
+        next_split = split_text
+        flag = False
+        while np.mean(sim_pair) <= threshold and flag == False:
+          next_split, flag = self.split_txt(next_split)  
+          sim_pair = []
+          word_pair = []
+          if next_split == None:
+            flag == True
+            return ""
+          else:   
+            for word in next_split.split():
+              sim = self.spell_correct(word,output='hybrid')
+              sim_pair.append(sim[1])
+              word_pair.append(sim[0])
+            sim_rec.append([sim_pair,word_pair])
+            mean_sim.append(np.mean(sim_pair))
+        best_pair = sim_rec[np.argmax(mean_sim)][1]
+        return " ".join(best_pair)
   def encode_word_for_svc(self,text):
     MAXLEN = 24
     encoded_word = []
