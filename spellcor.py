@@ -40,7 +40,7 @@ class spellcorrect:
             if output == 'similarity':
               return corrected.values[0][1]
             if output == 'hybrid':
-              return corrected.values[0]
+              return corrected.values
             else:
               return corrected.head()
       
