@@ -93,7 +93,8 @@ class spellcorrect:
         word_pair = []
         st.write(next_split)
         for word in next_split.split():
-          sim = self.spell_correct(word,output='hybrid') 
+          sim = self.spell_correct(word,output='hybrid')
+          st.write(sim)
           sim_pair.append(sim[0][1])
           word_pair.append(sim[0][0])
         sim_rec.append([sim_pair,word_pair])
