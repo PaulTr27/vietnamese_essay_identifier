@@ -91,6 +91,7 @@ class spellcorrect:
         next_split, flag = self.split_txt(next_split)  
         sim_pair = []
         word_pair = []
+        st.write(next_split)
         for word in next_split.split():
           sim = self.spell_correct(word,output='hybrid') 
           sim_pair.append(sim[0][1])
