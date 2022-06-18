@@ -111,6 +111,7 @@ def application():
                     out = spellcorrecter.spell_correct(word)
                     fix.append(out)
                 to_ann = st.session_state.input_text
+                st.write(fix)
                 ann_list = [txt + ' ' for txt in list(to_ann.split(' '))]
                 for word in misspelled:
                     if (word +' ') in ann_list:
