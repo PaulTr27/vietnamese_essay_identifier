@@ -119,7 +119,10 @@ def application():
                         suggest = fix[misspelled.index(word)]
                         ann_list[idx] = (word,suggest,'#faa') 
                 st.write(ann_list)
-                st.write([isinstance(a,list) for a in ann_list])
+                list_check = []
+                for value in ann_list:
+                  st.write(value)
+                  list_check.append(isinstance(value,list))
                 if not any([isinstance(value,list) for value in ann_list]):
                     st.session_state.phase = 3 
                 else:
