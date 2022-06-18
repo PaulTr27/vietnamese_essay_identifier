@@ -112,6 +112,7 @@ def application():
                     fix.append(out)
                 to_ann = st.session_state.input_text
                 ann_list = [txt + ' ' for txt in list(to_ann.split(' '))]
+                st.write(ann_list)
                 for word in misspelled:
                     st.write(word)
                     if word in ann_list:
