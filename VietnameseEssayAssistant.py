@@ -114,10 +114,10 @@ def application():
                 st.write(fix)
                 ann_list = [txt + ' ' for txt in list(to_ann.split(' '))]
                 for word in misspelled:
-                    if (word +' ') in ann_list:
+                    if word in ann_list:
                         idx = ann_list.index(word +' ')
                         suggest = fix[misspelled.index(word)]
-                        ann_list[idx] = (word,suggest,'#faa') 
+                        ann_list[idx] = (word+ ' ',suggest,'#faa') 
                 st.write(ann_list)
                 list_check = []
                 for value in ann_list:
