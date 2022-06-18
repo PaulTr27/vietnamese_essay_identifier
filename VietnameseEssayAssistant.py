@@ -115,7 +115,7 @@ def application():
                 ann_list_sub =[word.translate(word.maketrans('','',string.punctuation)) for word in ann_list]
 
                 for word in misspelled:
-                    if word in " ".join(ann_list):
+                    if word in " ".join(ann_list_sub):
                         idx = ann_list_sub.index(word +' ')
                         suggest = fix[misspelled.index(word)]
                         ann_list[idx] = (word+ ' ',suggest,'#faa') 
