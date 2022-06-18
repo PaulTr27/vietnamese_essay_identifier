@@ -101,6 +101,7 @@ def application():
         if len(misspelled) == 0:
             st.session_state.phase = 3
         elif len(misspelled) > 0 and not st.session_state.fixed:
+            p2 = st.empty()
             with st.spinner("Evaluating..."):
                 fix = []
                 spellcorrecter = spellcorrect(encode_dict,decode_dict,df_vocab,space_svc)
@@ -119,12 +120,11 @@ def application():
                 if not any([isinstance(value,tuple) for value in ann_list]):
                     st.session_state.phase = 3 
                 else:
-                    col1, col2 = st.columns(2)
+                    col1, col2 = p2.columns(2)
                     col1.text_area("Fix your essay here",st.session_state.input_text,key = 'input_text',height = 1000)
                     col2.write("Detected mistakes with suggestions")
                     with col2:
                         st.markdown(f',<p align ="justify">{annotated_text(*ann_list)}</p>',unsafe_allow_html = True)
-                    st.write(st.session_state.fixed)
                     st.write("Click resubmit to submit again after you fixed the mistakes")
                     resub = st.empty()
                     resubmit = resub.button('Resubmit')
@@ -132,7 +132,7 @@ def application():
                       st.session_state.fixed = True
                       st.session_state.phase = 2
                       resub.empty()
-        st.write(st.session_state)
+                      p2.empty()
     if st.session_state.phase == 3 or st.session_state.fixed:
             col1,col2 = st.columns([10,7])
             with col1:
