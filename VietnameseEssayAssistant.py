@@ -121,7 +121,7 @@ def application():
                         ann_list[idx] = (word+ ' ',suggest,'#faa') 
                 list_check = []
                 for value in ann_list:
-                  list_check.append(isinstance(value,list))
+                  list_check.append(type(value))
                 st.write(list_check)
                 if not any([isinstance(value,list) for value in ann_list]):
                     st.session_state.phase = 3 
