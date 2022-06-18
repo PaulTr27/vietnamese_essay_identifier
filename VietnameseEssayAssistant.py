@@ -128,7 +128,12 @@ def application():
                         st.markdown(f',<p align ="justify">{annotated_text(*ann_list)}</p>',unsafe_allow_html = True)
                     st.write(st.session_state.fixed)
                     st.write("Click resubmit to submit again after you fixed the mistakes")
-                    resubmit_button = st.button('Resubmit',on_click=resubmit())
+                    resub = st.empty()
+                    resubmit = resub.button('Resubmit')
+                    if resubmit:
+                      st.session_state.fixed = True
+                      st.session_state.phase = 2
+                      resub.empty()
         st.write(st.session_state)
     if st.session_state.phase == 3 or st.session_state.fixed:
             col1,col2 = st.columns([10,7])
