@@ -130,6 +130,7 @@ def application():
                     resubmit_button = st.button('Resubmit',on_click=resubmit())
 
         if st.session_state.phase == 3 or st.session_state.fixed:
+            st.write(st.session_state)
             col1,col2 = st.columns([10,7])
             with col1:
                 st.markdown("## Your essay")
@@ -254,7 +255,7 @@ print(word_segmented_text)
             
 if __name__ == '__main__':
     if 'sidebar_selection' not in st.session_state:
-        st.session_state.sidebar_selection = 'Introduction'
+        st.session_state.sidebar_selection = 'Introduction' 
     df_vocab ,decode_dict,encode_dict, space_svc = sc.get_resources()
     segmented_vocab = df_vocab['Segmented Vocabulary'].to_list()
     vocab = df_vocab['Vocabulary'].to_list()
