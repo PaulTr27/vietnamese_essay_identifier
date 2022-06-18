@@ -33,11 +33,9 @@ def introduction():
     st.markdown(markdown)
 
 def resubmit():
-    st.session_state.sidebar_selection = "Use the app"
     st.session_state.fixed = True
     st.session_state.phase = 2
 def reset():
-    st.session_state.sidebar_selection = "Use the app"
     st.session_state.fixed = False
     st.session_state.phase = 1
 
