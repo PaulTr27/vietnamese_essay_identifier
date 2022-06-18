@@ -117,7 +117,7 @@ def application():
                     st.write(word)
                     if word in " ".join(ann_list):
                         st.write(word)
-                        idx = ann_list.index(word)
+                        idx = ann_list.index(word+ ' ')
                         suggest = fix[misspelled.index(word)]
                         st.write(suggest)
                         ann_list[idx] = (word+ ' ',suggest,'#faa') 
