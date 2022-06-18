@@ -118,7 +118,7 @@ def application():
                         idx = ann_list.index(word +' ')
                         suggest = fix[misspelled.index(word)]
                         ann_list[idx] = (word,suggest,'#faa') 
-                if not any([isinstance(value,list) for value in ann_list]):
+                if any([isinstance(value,list) for value in ann_list]):
                     st.session_state.phase = 3 
                 else:
                     col1, col2 = st.columns(2)
