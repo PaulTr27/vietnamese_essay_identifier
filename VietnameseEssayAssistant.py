@@ -113,7 +113,7 @@ def application():
                 to_ann = st.session_state.input_text
                 ann_list = [txt + ' ' for txt in list(to_ann.split(' '))]
                 for word in misspelled:
-                  st.write(word)
+                    st.write(word)
                     if word in ann_list:
                         st.write(word)
                         idx = ann_list.index(word)
@@ -137,7 +137,6 @@ def application():
                     resubmit_button = st.button('Resubmit',on_click=resubmit())
 
         if st.session_state.phase == 3 or st.session_state.fixed:
-            st.write(st.session_state)
             col1,col2 = st.columns([10,7])
             with col1:
                 st.markdown("## Your essay")
