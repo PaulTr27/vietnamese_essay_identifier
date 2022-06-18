@@ -112,20 +112,17 @@ def application():
                     fix.append(out)
                 to_ann = st.session_state.input_text
                 ann_list = [txt + ' ' for txt in list(to_ann.split(' '))]
-                st.write(ann_list)
                 for word in misspelled:
-                    st.write(word)
                     if word in " ".join(ann_list):
                         st.write(word)
                         idx = ann_list.index(word+ ' ')
                         suggest = fix[misspelled.index(word)]
                         st.write(suggest)
                         ann_list[idx] = (word+ ' ',suggest,'#faa') 
-                st.write(ann_list)
                 list_check = []
                 for value in ann_list:
-                  st.write(value)
                   list_check.append(isinstance(value,list))
+                st.write(list_check)
                 if not any([isinstance(value,list) for value in ann_list]):
                     st.session_state.phase = 3 
                 else:
