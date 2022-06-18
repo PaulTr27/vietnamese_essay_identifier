@@ -223,7 +223,7 @@ def project_detail():
             st.markdown("We can see that my algorithm works great with simple typo ,but it can not detects and provides alternatives for word in context (sửa and sữa) as the wrong word exists in the dictionary.")
             st.markdown("That is it. This is my first ever self-written NLP algorithm. I will continue on my path to develope a better Spell Correcting algorithm")
 
-        with st.expander("How finetuned my model:"):
+        with st.expander("How I finetuned my model:"):
             st.markdown("My model is a finetuned [PhoBERT model](https://huggingface.co/vinai/phobert-base) for a down-stream task of classify sentences to 5 categories.")
             st.markdown("I will only go through how I acquired and processed the data. \n You can check out how to use my model on [Huggingface](https://huggingface.co/PaulTran/vietnamese_essay_identify)")
             st.markdown("#### Data acquiring \n  The dataset was made from various sources of sample essays on the internet. \n The essays is split to sentences with respective labels as you can see here in the dataframe: ")
