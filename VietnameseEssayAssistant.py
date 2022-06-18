@@ -32,9 +32,7 @@ def introduction():
     markdown = "# ***WELCOME TO YOUR ESSAY ASSISTANT*** \n ## How to use this web-app \n Hi! This is Paul, the author of this project. To use the app, please select 'Use the application' on the sidebar to your left. If you want more information about this project or the source-code, please check out my [GitHub repository](https://github.com/PaulTran2734/vietnamese_essay_identifier) \n ## About this application \n - This is a handy NLP web-app created for those who struggles to write the right type of essay in Vietnamese. Especially students of primary or secondary level of education in Vietnam. \n - At primary level of education in Vietnam, students are introduced to 5 types of essay: Argumentative, Espressive, Expository, Narrative, Descriptive. When they are first introduced to these, they can find it hard to write the right type of essay. For example, they can be too *descriptive* in an **Expressive** essay which requires more emotion or thoughts about a subject or an object than the specifity of its features. Therefore, this simple application was developed in order to solve this problem to a certain degree. \n- A spell-check algorithm is also included in this app. Despite its inefficiency, it can at least check for words that are mistyped, or not exist in Vietnamese Dictionary. This is my first ever attempt in writing an NLP algorithm, hence its inefficiency. \n ## More about my project \n To know more about my project e.g. which model I used and how I trained my model, etc, go to 'How I make this project works' tab on the sidebar to your left. :smile:"
     st.markdown(markdown)
 
-def resubmit():
-    st.session_state.fixed = True
-    st.session_state.phase = 2
+
 def reset():
     st.session_state.fixed = False
     st.session_state.phase = 1
@@ -259,8 +257,7 @@ print(word_segmented_text)
 
             
 if __name__ == '__main__':
-    if 'sidebar_selection' not in st.session_state:
-        st.session_state.sidebar_selection = 'Introduction' 
+    
     df_vocab ,decode_dict,encode_dict, space_svc = sc.get_resources()
     segmented_vocab = df_vocab['Segmented Vocabulary'].to_list()
     vocab = df_vocab['Vocabulary'].to_list()
