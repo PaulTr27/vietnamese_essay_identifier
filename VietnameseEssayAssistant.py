@@ -31,12 +31,13 @@ def load_model(model_path,seg_path):
 def introduction():
     markdown = "# ***WELCOME TO YOUR ESSAY ASSISTANT*** \n ## How to use this web-app \n Hi! This is Paul, the author of this project. To use the app, please select 'Use the application' on the sidebar to your left. If you want more information about this project or the source-code, please check out my [GitHub repository](https://github.com/PaulTran2734/vietnamese_essay_identifier) \n ## About this application \n - This is a handy NLP web-app created for those who struggles to write the right type of essay in Vietnamese. Especially students of primary or secondary level of education in Vietnam. \n - At primary level of education in Vietnam, students are introduced to 5 types of essay: Argumentative, Espressive, Expository, Narrative, Descriptive. When they are first introduced to these, they can find it hard to write the right type of essay. For example, they can be too *descriptive* in an **Expressive** essay which requires more emotion or thoughts about a subject or an object than the specifity of its features. Therefore, this simple application was developed in order to solve this problem to a certain degree. \n- A spell-check algorithm is also included in this app. Despite its inefficiency, it can at least check for words that are mistyped, or not exist in Vietnamese Dictionary. This is my first ever attempt in writing an NLP algorithm, hence its inefficiency. \n ## More about my project \n To know more about my project e.g. which model I used and how I trained my model, etc, go to 'How I make this project works' tab on the sidebar to your left. :smile:"
     st.markdown(markdown)
-def radio_callback():
-    st.session_state.radio_option = st.session_state.radio
+
 def resubmit():
+    st.session_state.sidebar_selection = "Use the app"
     st.session_state.fixed = True
     st.session_state.phase = 2
 def reset():
+    st.session_state.sidebar_selection = "Use the app"
     st.session_state.fixed = False
     st.session_state.phase = 1
 
@@ -127,6 +128,7 @@ def application():
                     col2.write("Detected mistakes with suggestions")
                     with col2:
                         st.markdown(f',<p align ="justify">{annotated_text(*ann_list)}</p>',unsafe_allow_html = True)
+                    st.write(st.session_state.fixed)
                     st.write("Click resubmit to submit again after you fixed the mistakes")
                     resubmit_button = st.button('Resubmit',on_click=resubmit())
         st.write(st.session_state)
