@@ -115,7 +115,7 @@ def application():
                 st.write(ann_list)
                 for word in misspelled:
                     st.write(word)
-                    if word in ann_list:
+                    if word in " ".join(ann_list):
                         st.write(word)
                         idx = ann_list.index(word)
                         suggest = fix[misspelled.index(word)]
