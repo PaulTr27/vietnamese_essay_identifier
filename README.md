@@ -13,3 +13,18 @@ An educational tool for young students that helps with writing essays
 - This AI assistant includes a Fine-tuned SequenceClassificationPhoBERT model for classifying categories of input essay and a self written SpellCorrect algorithm for spell-checking and alternative-suggesting.
 - For more information about this project, you can go to my [slides](https://hackmd.io/@Froggyplayz123/DL4AI_Presentation#/3) or you can see more in [my streamlit app](https://share.streamlit.io/paultran2734/vietnamese_essay_identifier/main/Final.py) 
 
+# Dependencies
+
+In your terminal or command prompt, install requirements using pip:
+```
+pip install -r requirements.txt
+```
+then clone this repository:
+```
+git clone https://github.com/PaulTran2734/vietnamese_essay_identifier/
+```
+To run streamlit locally, change your working directory and run streamlit:
+```
+cd vietnamese_essay_identifier
+streamlit run VietnameseEssayAssistant.py
+```
