@@ -125,7 +125,7 @@ def application():
                     col1.text_area("Fix your essay here",st.session_state.input_text,key = 'input_text',height = 1000)
                     col2.write("Detected mistakes with suggestions")
                     with col2:
-                        st.write(annotated_text(*ann_list))
+                        annotated_text(*ann_list)
                     p2.write("Click resubmit to submit again after you fixed the mistakes")
                     resub = st.empty()
                     resubmit = resub.button('Resubmit')
