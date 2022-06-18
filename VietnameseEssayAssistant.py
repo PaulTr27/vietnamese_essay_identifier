@@ -112,9 +112,11 @@ def application():
                     fix.append(out)
                 to_ann = st.session_state.input_text
                 ann_list = [txt + ' ' for txt in list(to_ann.split(' '))]
+                ann_list_sub =[word.translate(word.maketrans('','',string.punctuation)) for word in ann_list]
+
                 for word in misspelled:
                     if word in " ".join(ann_list):
-                        idx = ann_list.index(word.translate(word.maketrans('','',string.punctuation))+ ' ')
+                        idx = ann_list_sub.index(word +' ')
                         suggest = fix[misspelled.index(word)]
                         ann_list[idx] = (word+ ' ',suggest,'#faa') 
                 if not any([isinstance(value,tuple) for value in ann_list]):
