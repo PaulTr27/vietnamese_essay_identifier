@@ -114,7 +114,7 @@ def application():
                 ann_list = [txt + ' ' for txt in list(to_ann.split(' '))]
                 for word in misspelled:
                     if word in " ".join(ann_list):
-                        idx = ann_list.index(word+ ' ')
+                        idx = ann_list.index(word.translate(word.maketrans('','',string.punctuation))+ ' ')
                         suggest = fix[misspelled.index(word)]
                         ann_list[idx] = (word+ ' ',suggest,'#faa') 
                 if not any([isinstance(value,tuple) for value in ann_list]):
