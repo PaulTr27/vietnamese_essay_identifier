@@ -69,6 +69,7 @@ def application():
 
 
     if st.session_state.phase == 2:
+        st.write(st.session_state)
         fixed = False
         sentences_list = st.session_state.input_text.split('.')
         pred_labels_list = []
@@ -101,7 +102,7 @@ def application():
             for i in range(5):
                 pred_prob.append((pred_labels_list.count(i)/len(pred_labels_list)))
             pred_label_name = label_names[np.argmax(pred_prob)]
-
+        st.write(len(misspelled))
         if len(misspelled) == 0:
             st.session_state.phase = 3
         elif len(misspelled) > 0 and not st.session_state.fixed:
@@ -118,7 +119,7 @@ def application():
                         idx = ann_list.index(word +' ')
                         suggest = fix[misspelled.index(word)]
                         ann_list[idx] = (word,suggest,'#faa') 
-                if any([isinstance(value,list) for value in ann_list]):
+                if not any([isinstance(value,list) for value in ann_list]):
                     st.session_state.phase = 3 
                 else:
                     col1, col2 = st.columns(2)
