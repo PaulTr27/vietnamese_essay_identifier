@@ -125,8 +125,7 @@ def application():
                     col1.text_area("Fix your essay here",st.session_state.input_text,key = 'input_text',height = 1000)
                     col2.write("Detected mistakes with suggestions")
                     with col2:
-                        ann_list = ann_list[:-3]
-                        st.markdown(f',<p align ="justify">{annotated_text(*ann_list)}</p>',unsafe_allow_html = True)
+                        st.markdown(f'<p align ="justify">{annotated_text(*ann_list)}</p>',unsafe_allow_html = True)
                     p2.write("Click resubmit to submit again after you fixed the mistakes")
                     resub = st.empty()
                     resubmit = resub.button('Resubmit')
