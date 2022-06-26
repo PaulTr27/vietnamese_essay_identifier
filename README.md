@@ -15,16 +15,19 @@ An educational tool for young students that helps with writing essays
 
 # Dependencies
 
-In your terminal or command prompt, install requirements using pip:
-```
-pip install -r requirements.txt
-```
-then clone this repository:
+In your terminal or command prompt, clone this repository:
 ```
 git clone https://github.com/PaulTran2734/vietnamese_essay_identifier/
 ```
-To run streamlit locally, change your working directory and run streamlit:
+change your working directory:
 ```
 cd vietnamese_essay_identifier
+```
+then install requirements using pip:
+```
+pip install -r requirements.txt
+```
+To run streamlit locally, use:
+```
 streamlit run VietnameseEssayAssistant.py
 ```
